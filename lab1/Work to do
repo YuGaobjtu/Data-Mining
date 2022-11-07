@@ -24,7 +24,7 @@ For example: Ahash={0,1,2,3}, n=6: return a 1x6 vector Asig={0,2,5,1,2,3}, the s
 in which they agree
 
 Input:minhash signatures
-Output:Jaccard similarity
+Output: similarity of columns
 For example: Asig={0,2,5,1,2,3}, Bsig={1,4,5,1,3,5}: similarity = 2/6 = 0.33
 
 LSH: Locality-Sensitive Hashing
