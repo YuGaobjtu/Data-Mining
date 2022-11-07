@@ -1,0 +1,36 @@
+Compare the Jaccard similarity of two sets
+1.A class Shingling that constructs k–shingles of a given length k (e.g., 10) from a given document, computes a hash value 
+for each unique shingle and represents the document in the form of an ordered set of its hashed k-shingles.
+
+Input: Documents(header), size of k
+Output: Hash integer Set
+For example: A="abcde", B="abd",k = 2: Ahash={0,1,2,3}, Bhash={0,4}
+
+2.A class CompareSets computes the Jaccard similarity of two sets of integers – two sets of hashed shingles.
+
+Input:Hash integer Sets
+Output:Jaccard similarity
+For example: Ahash={0,1,2,3},Bhash={0,4}: Jaccard similarity = 1/5 = 0.2
+
+Compare the similarity with minhash signatures
+3.A class MinHashing that builds a minHash signature (in the form of a vector or a set) of a given length n from a given set 
+of integers (a set of hashed shingles).
+
+Input:Hash integer Sets, size of n
+Output:minhash signatures(n times min[(A*a+b)%c] with random values of a,b,c)
+For example: Ahash={0,1,2,3}, n=6: return a 1x6 vector Asig={0,2,5,1,2,3}, the same with Bhash => Bsig={1,4,5,1,3,5}.
+
+4.A class CompareSignatures estimates the similarity of two integer vectors – minhash signatures – as a fraction of components 
+in which they agree
+
+Input:minhash signatures
+Output:Jaccard similarity
+For example: Asig={0,2,5,1,2,3}, Bsig={1,4,5,1,3,5}: similarity = 2/6 = 0.33
+
+LSH: Locality-Sensitive Hashing
+5.A class LSH that implements the LSH technique: given a collection of minhash signatures (integer vectors) and a similarity threshold
+t, the LSH class (using banding and hashing) finds candidate pairs of signatures agreeing on at least a fraction t of their components.
+
+Input:minhash signatures, band width w
+Output: pairs of similar colunms
+For example: Asig={0,2,5,1,2,3}, Bsig={1,4,5,1,3,5}, w=2: A and B are similar pairs because the 3rd and 4th values between them are equal.
