@@ -31,6 +31,7 @@ LSH: Locality-Sensitive Hashing
 5.A class LSH that implements the LSH technique: given a collection of minhash signatures (integer vectors) and a similarity threshold
 t, the LSH class (using banding and hashing) finds candidate pairs of signatures agreeing on at least a fraction t of their components.
 
-Input:minhash signatures, band width w
+Input:minhash signatures, The number of bands b, and The number of rows r per band
 Output: pairs of similar colunms
-For example: Asig={0,2,5,1,2,3}, Bsig={1,4,5,1,3,5}, w=2: A and B are similar pairs because the 3rd and 4th values between them are equal.
+For example: Asig={0,2,5,1,2,3}, Bsig={1,4,5,1,3,5}, b=3, r=2: there are 3 dataset for each minhash signature,Asig:{0,2},{5,1},{2,3}, 
+Bsig:{1,4},{5,1},{3,5},Asig and Bsig are similar pairs because the 3rd and 4th values between them are equal.
