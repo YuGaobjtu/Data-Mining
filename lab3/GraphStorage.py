@@ -20,14 +20,18 @@ File looks like this:
 
 #TODO retrieve and load graph
 
+import csv
+
+
 class GraphStorage:
 
     def __init__(self):
-        #TODO update unzip and load graph
-        self.path = 'Lab3\web-Google.txt\web-Google.txt' #TODO adjust
+        self.path = 'Lab3\web-Google.txt'
         
-
     def loadGraph(self):
-        #TODO load and process graph
         # start reading file from the 5th row then for every line edge = (line[0], line[1])
-        return [(12, 323), (124, 8756), (6363, 8373)] # TODO Update
+        edges = []
+        with open(self.path,'r') as f:
+            for line in f.readlines()[4:]:
+                edges.append((line.split()[0].strip(), line.split()[1].strip()))
+        return edges

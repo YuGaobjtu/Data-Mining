@@ -30,17 +30,17 @@ class TriangleCountsStreamingAlgo:
     '''
     def streamingTriangles(self, stream, se, sw):
         # 1
-        edge_res = [] * se # edge reservoir maintains a uniform random sample of edges observed so fa
+        edge_res = [[]] * se # edge reservoir maintains a uniform random sample of edges observed so fa
         # 1
-        wedge_res = [] * sw # maintains a uniform sample of the wedges created by the edge reservoir at any step of the process
+        wedge_res = [[]] * sw # maintains a uniform sample of the wedges created by the edge reservoir at any step of the process
         # 1
-        t = 0
+        t = 1
         isClosed = [False] * sw # default wedge detected as not closed
         for et in stream:
             # 2
             edge_res, wedge_res, isClosed, tot_wedges = self.update(et, t, se, sw, edge_res, wedge_res, isClosed)
             # 3
-            p = isClosed.sum() / len(isClosed)
+            p = isClosed.count(True) / len(isClosed)
             # 4
             kt = 3*p
             # 5
@@ -77,13 +77,14 @@ class TriangleCountsStreamingAlgo:
         for i in range(sw):
             # 2 
             wed = wedge_res[i] # e.g. wedge = [(u1, v1), (u2, v2)]   et = (u3, v3)
-            c1 = wed[0][0] == wed[1][0] and (et.contains(wed[0][1]) or et.contains(wed[1][1]))
-            c2 = wed[0][0] == wed[1][1] and (et.contains(wed[0][1]) or et.contains(wed[1][0]))
-            c3 = wed[0][1] == wed[1][0] and (et.contains(wed[0][0]) or et.contains(wed[1][1]))
-            c4 = wed[0][1] == wed[1][1] and (et.contains(wed[0][0]) or et.contains(wed[1][0]))
-            # 3
-            if c1 or c2 or c3 or c4:
-                isClosed[i] = True
+            if wed != []:
+                c1 = wed[0][0] == wed[1][0] and (wed[0][1] in et or wed[1][1] in et)
+                c2 = wed[0][0] == wed[1][1] and (wed[0][1] in et or wed[1][0] in et)
+                c3 = wed[0][1] == wed[1][0] and (wed[0][0] in et or wed[1][1] in et)
+                c4 = wed[0][1] == wed[1][1] and (wed[0][0] in et or wed[1][0] in et)
+                # 3
+                if c1 or c2 or c3 or c4:
+                    isClosed[i] = True
                  
         # ***************** DONE DETERMINE WEDGES CLOSED BY ET ***********************
         # ----------------------------------------------------------------------------
@@ -103,19 +104,19 @@ class TriangleCountsStreamingAlgo:
         # ----------------------------------------------------------------------------
         # *************************** PERFORM UPDATES ******************************** 
         # 8
+        tot_wedges = 0
         if anyUpdateOnEdgeRes:
             # 9 (This is the total number of wedges formed by edges in the current edge res)
-            tot_wedges = 0
             for i in range(len(edge_res)):
                 for j in range(i+1, len(edge_res)):
-                    if edge_res[i].contains(edge_res[j][0]) or edge_res[i].contains(edge_res[j][1]):
+                    if edge_res[j][0] in edge_res[i] or edge_res[j][1] in edge_res[i]:
                         tot_wedges += 1
 
             # 10
             Nt = []
-            if edge_res.contains(et): # if to speed up computation assuming in many cases we don't need for loop as et is not even in edge_res
+            if et in edge_res: # if to speed up computation assuming in many cases we don't need for loop as et is not even in edge_res
                 for edge in edge_res:
-                    if edge.contains(et[0]) or edge.contains(et[1]): # et = (u,v); edge = (x,y)
+                    if et[0] in edge or et[1] in edge: # et = (u,v); edge = (x,y)
                         Nt.append([edge, et])
             new_wedges = len(Nt)
 
