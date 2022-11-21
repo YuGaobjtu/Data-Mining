@@ -17,7 +17,7 @@ class TriangleCountsStreamingAlgo:
 
     def getTriangleCountEstimate(self):
         #TODO return StreamingTriangles. This will return the estimate after the last element in the stream was processed
-        return 0.02
+        return self.streamingTriangles(self.streamGraph, 5, 5)
 
     '''
     PSEUDO Code (ALGO 1)
@@ -28,17 +28,17 @@ class TriangleCountsStreamingAlgo:
     4 Set κt = 3ρ.
     5 Set Tt = [ρt2/se(se − 1)] × tot wedges.
     '''
-    def StreamingTriangles(self, stream, se, sw):
+    def streamingTriangles(self, stream, se, sw):
         # 1
-        edge_res = [] * len(se) # edge reservoir maintains a uniform random sample of edges observed so fa
+        edge_res = [] * se # edge reservoir maintains a uniform random sample of edges observed so fa
         # 1
-        wedge_res = [] * len(sw) # maintains a uniform sample of the wedges created by the edge reservoir at any step of the process
+        wedge_res = [] * sw # maintains a uniform sample of the wedges created by the edge reservoir at any step of the process
         # 1
         t = 0
-        isClosed = [False] * len(sw) # default wedge detected as not closed
+        isClosed = [False] * sw # default wedge detected as not closed
         for et in stream:
             # 2
-            edge_res, wedge_res, isClosed, tot_wedges = self.update(self, et, t, se, sw, edge_res, wedge_res, isClosed)
+            edge_res, wedge_res, isClosed, tot_wedges = self.update(et, t, se, sw, edge_res, wedge_res, isClosed)
             # 3
             p = isClosed.sum() / len(isClosed)
             # 4
@@ -74,7 +74,7 @@ class TriangleCountsStreamingAlgo:
         # ----------------------------------------------------------------------------
         # ******************* DETERMINE WEDGES CLOSED BY ET **************************
         # 1
-        for i in range(len(sw)):
+        for i in range(sw):
             # 2 
             wed = wedge_res[i] # e.g. wedge = [(u1, v1), (u2, v2)]   et = (u3, v3)
             c1 = wed[0][0] == wed[1][0] and (et.contains(wed[0][1]) or et.contains(wed[1][1]))
@@ -91,7 +91,7 @@ class TriangleCountsStreamingAlgo:
         # PART OF RESERVOIR SAMPLING (replacing each entry by et with probability 1/t)
         # 4 
         anyUpdateOnEdgeRes = False
-        for i in range(len(se)):
+        for i in range(se):
             # 5 
             x = random.randint(0, 1)
             # 6
@@ -123,7 +123,7 @@ class TriangleCountsStreamingAlgo:
         # -------------------------------------------------------------------------------
         # *****************   RESERVOIR SAMPLING WEDGES *********************************
             # 11
-            for i in range(len(sw)):
+            for i in range(sw):
                 # 12
                 x = random.randint(0, 1)
                 # 13
