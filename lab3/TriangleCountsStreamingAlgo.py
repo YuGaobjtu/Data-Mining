@@ -17,7 +17,7 @@ class TriangleCountsStreamingAlgo:
 
     def getTriangleCountEstimate(self):
         #TODO return StreamingTriangles. This will return the estimate after the last element in the stream was processed
-        return self.streamingTriangles(self.streamGraph, 5, 5)
+        return self.streamingTriangles(self.streamGraph, 100, 100) #TODO How to set se and sw??
 
     '''
     PSEUDO Code (ALGO 1)
@@ -128,7 +128,7 @@ class TriangleCountsStreamingAlgo:
                 # 12
                 x = random.randint(0, 1)
                 # 13
-                if x> 0 and x <= new_wedges/tot_wedges: #TODO I added x>0 hope it doesn't cause an issue
+                if tot_wedges > 0 and x <= new_wedges/tot_wedges: #TODO I added tot_wedges >0 hope it doesn't cause an issue
                     # 14
                     w = random.choice(Nt)
                     # 15
