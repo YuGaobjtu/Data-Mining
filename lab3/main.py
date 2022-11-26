@@ -13,18 +13,11 @@ implemented in the first step. 
 from GraphStorage import GraphStorage
 from TriangleCountsStreamingAlgo import TriangleCountsStreamingAlgo
 
-'''
-Currently the output looks like this (sample):
-Processing et: ('486658', '502407'). Immediate output for Kt: 3.0. Immedidate output for T_1964816: 1930250956928.0.
---> T is extremley high --> Fine tuning needed.
-'''
-
-
 def main():
     print('Computing transitivity for Web Google Graph: https://snap.stanford.edu/data/web-Google.html')
     graph = GraphStorage().loadGraph()
-    triangleCountEstimate = TriangleCountsStreamingAlgo(graph).getTriangleCountEstimate()
-    print('Transitivity is: {}'.format(triangleCountEstimate))
+    triangleCountEstimate, transitivityEstimate = TriangleCountsStreamingAlgo(graph).getTriangleCountEstimate()
+    print('Estimated Triangles: {}. Estimated Transitivity is: {}'.format(triangleCountEstimate, transitivityEstimate))
 
 if __name__ == "__main__":
     main()

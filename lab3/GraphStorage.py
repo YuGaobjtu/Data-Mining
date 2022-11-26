@@ -29,9 +29,16 @@ class GraphStorage:
         self.path = 'Lab3\web-Google.txt'
         
     def loadGraph(self):
-        # start reading file from the 5th row then for every line edge = (line[0], line[1])
-        edges = []
+        # start reading file from the 5th row then for every line read edge and remove dubs
+        edges = set()
         with open(self.path,'r') as f:
-            for line in f.readlines()[4:]:
-                edges.append((line.split()[0].strip(), line.split()[1].strip()))
-        return edges
+            for line in f.readlines()[4:2000]:
+                edges.add(frozenset((line.split()[0].strip(), line.split()[1].strip())))
+        edgesList = []
+        for edge in list(edges):
+            edgeLst = []
+            for node in iter(edge):
+                edgeLst.append(node)
+            edgesList.append((edgeLst[0], edgeLst[1]))
+
+        return edgesList

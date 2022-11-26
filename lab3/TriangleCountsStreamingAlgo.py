@@ -16,8 +16,7 @@ class TriangleCountsStreamingAlgo:
         self.streamGraph = streamGraph
 
     def getTriangleCountEstimate(self):
-        #TODO return StreamingTriangles. This will return the estimate after the last element in the stream was processed
-        return self.streamingTriangles(self.streamGraph, 100, 100) #TODO How to set se and sw??
+        return self.streamingTriangles(self.streamGraph, 100, 100) 
 
     '''
     PSEUDO Code (ALGO 1)
@@ -31,24 +30,29 @@ class TriangleCountsStreamingAlgo:
     def streamingTriangles(self, stream, se, sw):
         # 1
         edge_res = [[]] * se # edge reservoir maintains a uniform random sample of edges observed so fa
-        # 1
         wedge_res = [[]] * sw # maintains a uniform sample of the wedges created by the edge reservoir at any step of the process
-        # 1
+        tot_wedges = 0
         t = 1
-        isClosed = [False] * sw # default wedge detected as not closed
-        for et in stream:
+        isClosed = [None] * sw # default wedge detected as not closed
+        for edge in stream:
             # 2
-            edge_res, wedge_res, isClosed, tot_wedges = self.update(et, t, se, sw, edge_res, wedge_res, isClosed)
+            edge_res, wedge_res, isClosed, tot_wedges = self.update(edge, t, se, sw, edge_res, wedge_res, isClosed, tot_wedges)
             # 3
-            p = isClosed.count(True) / len(isClosed)
+            T = isClosed.count(True) 
+            W = (T+isClosed.count(False))
+            if W == 0:
+                p = 0
+            else:
+                p = T/W
+            #print('p: {}, tot_wedges: {}'.format(p, tot_wedges))
             # 4
             kt = 3*p
             # 5
             Tt = ((p * (t**2)) / (se * (se - 1))) * tot_wedges
-            print('Processing et: {}. Immediate output for Kt: {}. Immedidate output for T_{}: {}.'.format(et, kt, t, Tt))
+            print('Proc edge: {}. Output for K_{}: {}. T_{}: {}.'.format(edge, t, kt, t, Tt))
             # Update t
             t += 1
-        return Tt # Return the value for the last value in the stream
+        return Tt, kt # Return the value for the last value in the stream
 
     '''
     PSEUDO Code (ALGO 2)
@@ -70,21 +74,20 @@ class TriangleCountsStreamingAlgo:
     15          wedge res[i] ← w.
     16          SisClosed[i] ← false.
     '''
-    def update(self, et, t, se, sw, edge_res, wedge_res, isClosed):
+    def update(self, et, t, se, sw, edge_res, wedge_res, isClosed, tot_wedges):
         # ----------------------------------------------------------------------------
         # ******************* DETERMINE WEDGES CLOSED BY ET **************************
         # 1
+        #print('wed_res: {}'.format(wedge_res))
         for i in range(sw):
             # 2 
             wed = wedge_res[i] # e.g. wedge = [(u1, v1), (u2, v2)]   et = (u3, v3)
             if wed != []:
-                c1 = wed[0][0] == wed[1][0] and (wed[0][1] in et or wed[1][1] in et)
-                c2 = wed[0][0] == wed[1][1] and (wed[0][1] in et or wed[1][0] in et)
-                c3 = wed[0][1] == wed[1][0] and (wed[0][0] in et or wed[1][1] in et)
-                c4 = wed[0][1] == wed[1][1] and (wed[0][0] in et or wed[1][0] in et)
-                # 3
-                if c1 or c2 or c3 or c4:
-                    isClosed[i] = True
+                #print(wed)
+                nodes = {wed[0][0], wed[0][1], wed[1][0], wed[1][1]}
+                if et[0] in nodes and et[1] in nodes:
+                    if((et[0], et[1]) not in wed):
+                        isClosed[i] = True
                  
         # ***************** DONE DETERMINE WEDGES CLOSED BY ET ***********************
         # ----------------------------------------------------------------------------
@@ -94,30 +97,33 @@ class TriangleCountsStreamingAlgo:
         anyUpdateOnEdgeRes = False
         for i in range(se):
             # 5 
-            x = random.randint(0, 1)
+            x = random.uniform(0,1)
             # 6
             if x <= 1/t:
                 # 7
                 edge_res[i] = et
                 anyUpdateOnEdgeRes = True
+                break # I added an edge can't be added multiple times
         # ******************* DONE RESERVOIR SAMPLING ******************************** 
         # ----------------------------------------------------------------------------
         # *************************** PERFORM UPDATES ******************************** 
         # 8
-        tot_wedges = 0
         if anyUpdateOnEdgeRes:
+            tot_wedges = 0
             # 9 (This is the total number of wedges formed by edges in the current edge res)
             for i in range(len(edge_res)):
                 for j in range(i+1, len(edge_res)):
-                    if edge_res[j][0] in edge_res[i] or edge_res[j][1] in edge_res[i]:
+                    if (edge_res[j] != [] and edge_res[i] != [] and (edge_res[j][0] in edge_res[i]) ^ (edge_res[j][1] in edge_res[i])): #XOR because we don't want to count same 2 same edges as wedge
+                        #print('edge_res j: {}, edge_res_i: {}'.format(edge_res_no_dub[j], edge_res_no_dub[i]))
                         tot_wedges += 1
 
             # 10
             Nt = []
-            if et in edge_res: # if to speed up computation assuming in many cases we don't need for loop as et is not even in edge_res
-                for edge in edge_res:
-                    if et[0] in edge or et[1] in edge: # et = (u,v); edge = (x,y)
-                        Nt.append([edge, et])
+            for edge in edge_res:
+                if et[0] in edge:
+                    Nt.append([edge, et])
+                if et[1] in edge:
+                    Nt.append([et, edge])
             new_wedges = len(Nt)
 
         # *************************** DONE PERFORM UPDATES ******************************
@@ -126,15 +132,16 @@ class TriangleCountsStreamingAlgo:
             # 11
             for i in range(sw):
                 # 12
-                x = random.randint(0, 1)
+                x = random.uniform(0,1)
                 # 13
-                if tot_wedges > 0 and x <= new_wedges/tot_wedges: #TODO I added tot_wedges >0 hope it doesn't cause an issue
+                if tot_wedges > 0 and x <= new_wedges/tot_wedges: # I added tot_wedges >0 hope it doesn't cause an issue
                     # 14
                     w = random.choice(Nt)
                     # 15
                     wedge_res[i] = w
                     # 16
                     isClosed[i] = False
+                    break # I added this break to avoid that the same wedge is added multiple times
 
         # *****************   DONE RESERVOIR SAMPLING WEDGES *****************************
         # --------------------------------------------------------------------------------
